@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/codercodingthecode/goquote/currencyFetch/socketsclient"
+	"github.com/codercodingthecode/goquote/currencyfetch"
+	"github.com/codercodingthecode/goquote/socketsclient"
+	// "github.com/codercodingthecode/goquote/currencyfetch/socketsclient"
+	// "github.com/codercodingthecode/goquote/currencyfetch/socketsclient"
 	// "currencyFetch/socketsclient"
-	"github.com/codercodingthecode/goquote/currencyFetch/currencyfetch"
+	// "github.com/codercodingthecode/goquote/currencyfetch/currencyfetch"
 	// "currencyFetch/currencyfetch"
 )
 
