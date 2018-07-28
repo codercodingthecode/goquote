@@ -1,0 +1,7 @@
+Socket.go:
+- separate string socket query (line 28)
+
+- implement logs file, save to s3.
+- add try catch statement.
+- add notification on crash by email/text.
+- move redis form old app to current.
