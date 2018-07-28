@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/codercodingthecode/daix_quote_go/currencyFetch/socketsclient"
+	"github.com/codercodingthecode/goquote/currencyFetch/socketsclient"
 	// "currencyFetch/socketsclient"
-	"github.com/codercodingthecode/daix_quote_go/currencyFetch/currencyfetch"
+	"github.com/codercodingthecode/goquote/currencyFetch/currencyfetch"
 	// "currencyFetch/currencyfetch"
 )
 
