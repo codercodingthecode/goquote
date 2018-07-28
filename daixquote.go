@@ -1,6 +1,5 @@
 package main
 
-// test github
 import (
 	"fmt"
 
