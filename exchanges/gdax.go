@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	// _ "github.com/go-sql-driver/mysql"
 	ws "github.com/gorilla/websocket"
@@ -21,21 +22,6 @@ type GDAXI interface {
 }
 
 var gdaxRestURL = "https://api.gdax.com/products" // response -> id -> "eth" **
-// func main() {
-// 	errCh := make(chan error)
-// 	currencies, err := entity.FetchRowsFromDB("gdax")
-// 	if err == nil {
-// 		go entity.ProcessQuoteTickUpdates()
-// 		go subscribeToGDAX(currencies)
-
-// 		select {
-// 		case err := <-errCh:
-// 			if err != nil {
-// 				fmt.Println(err)
-// 			}
-// 		}
-// 	}
-// }
 
 // Fetchs the currency list from GDAX thru rest call which had the same data structure
 // Function: Receives two arguemts and feed data thru the channel back to the caller:
@@ -80,8 +66,6 @@ func SubscribeToGDAX(chStatus <-chan string) {
 	var tickRawData interface{}
 	var websocket ws.Dialer
 
-	// fmt.Println("WEBSOCKETLIST --> ", WebsocketList()[k])
-
 	wsConn, _, wsError := websocket.Dial("wss://ws-feed.gdax.com", nil) // this will have to change per loop or concurrency
 	if wsError != nil {
 		fmt.Println("There was an error dialing in -> ", wsError)
@@ -90,10 +74,6 @@ func SubscribeToGDAX(chStatus <-chan string) {
 	b, _ := json.Marshal(fetchGdax(gdaxRestURL))
 
 	bigString := fmt.Sprintf(`{"type":"subscribe","channels": [{"name": "ticker", "product_ids": %s}]}`, b)
-
-	// fmt.Println("FROM SOCKECT STRING BUILD -> ", bigString)
-
-	// fmt.Println("From exchangeString -> ", testingString)
 
 	writeDataError := json.Unmarshal([]byte(bigString), &writeData)
 	if writeDataError != nil {
@@ -109,12 +89,46 @@ func SubscribeToGDAX(chStatus <-chan string) {
 			fmt.Println("Error in pulling in data -> ", readError)
 		}
 
-		tickData := tickRawData.(map[string]interface{})
+		tick := tickRawData.(map[string]interface{})
 
-		fmt.Println("This is the feed -> ", tickData)
+		// fmt.Println("This is the feed -> ", tickData)
 		// ch <- tickRawData
 		// cb(<-ch)
 		// exchanges.Gdax(tickRawData)
+
+		//--------------------------------------------------------------------------//
+		// shappring data below to send it to redis
+		//--------------------------------------------------------------------------//
+		// tick := message.(map[string]interface{})
+
+		if tick["high_24h"] == nil {
+			continue
+		}
+		last, _ := strconv.ParseFloat(tick["price"].(string), 64)
+		// marketName, _ := tick["product_id"].(string)
+
+		// prevLast, ok := marketCurrencyLastPrice[marketName]
+		// if ok {
+		// 	if prevLast == last {
+		// 		continue
+		// 	}
+		// }
+		// marketCurrencyLastPrice[marketName] = last
+
+		high, _ := strconv.ParseFloat(tick["high_24h"].(string), 64)
+		low, _ := strconv.ParseFloat(tick["low_24h"].(string), 64)
+		open, _ := strconv.ParseFloat(tick["open_24h"].(string), 64)
+		volume, _ := strconv.ParseFloat(tick["volume_24h"].(string), 64)
+		change := last - open
+		changePercent := change / open
+
+		// currencySymbol := entity.MarketNameToCurrencySymbolMap[marketName]
+		// baseSymbol := entity.MarketNameToBaseNameMap[marketName]
+
+		// val := entity.QuoteTick{baseSymbol, currencySymbol, "gdax-" + currencySymbol + "-" + baseSymbol, open, high, low, last, volume, time.Now().In(loc), change, changePercent}
+		// entity.QuoteUpdates <- val
+
+		fmt.Println("DATA FROM WEBSOCKET --> ", high, low, open, volume, change, changePercent)
 	}
 
 	// var wsDialer ws.Dialer
@@ -146,35 +160,35 @@ func SubscribeToGDAX(chStatus <-chan string) {
 	// 		fmt.Println("ERROR READING FROM JSON --> ", err1)
 	// 		panic(err1.Error())
 	// 	}
-	// 	fmt.Println("THIS IS INCOME DATA MESSAGE -> ", message)
-	// 	// tick := message.(map[string]interface{})
+	// fmt.Println("THIS IS INCOME DATA MESSAGE -> ", message)
+	// tick := message.(map[string]interface{})
 
-	// 	// if tick["high_24h"] == nil {
-	// 	// 	continue
-	// 	// }
-	// 	// last, _ := strconv.ParseFloat(tick["price"].(string), 64)
-	// 	// marketName, _ := tick["product_id"].(string)
+	// if tick["high_24h"] == nil {
+	// 	continue
+	// }
+	// last, _ := strconv.ParseFloat(tick["price"].(string), 64)
+	// marketName, _ := tick["product_id"].(string)
 
-	// 	// prevLast, ok := marketCurrencyLastPrice[marketName]
-	// 	// if ok {
-	// 	// 	if prevLast == last {
-	// 	// 		continue
-	// 	// 	}
-	// 	// }
-	// 	// marketCurrencyLastPrice[marketName] = last
+	// prevLast, ok := marketCurrencyLastPrice[marketName]
+	// if ok {
+	// 	if prevLast == last {
+	// 		continue
+	// 	}
+	// }
+	// marketCurrencyLastPrice[marketName] = last
 
-	// 	// high, _ := strconv.ParseFloat(tick["high_24h"].(string), 64)
-	// 	// low, _ := strconv.ParseFloat(tick["low_24h"].(string), 64)
-	// 	// open, _ := strconv.ParseFloat(tick["open_24h"].(string), 64)
-	// 	// volume, _ := strconv.ParseFloat(tick["volume_24h"].(string), 64)
-	// 	// change := last - open
-	// 	// changePercent := change / open
+	// high, _ := strconv.ParseFloat(tick["high_24h"].(string), 64)
+	// low, _ := strconv.ParseFloat(tick["low_24h"].(string), 64)
+	// open, _ := strconv.ParseFloat(tick["open_24h"].(string), 64)
+	// volume, _ := strconv.ParseFloat(tick["volume_24h"].(string), 64)
+	// change := last - open
+	// changePercent := change / open
 
-	// 	// currencySymbol := entity.MarketNameToCurrencySymbolMap[marketName]
-	// 	// baseSymbol := entity.MarketNameToBaseNameMap[marketName]
+	// currencySymbol := entity.MarketNameToCurrencySymbolMap[marketName]
+	// baseSymbol := entity.MarketNameToBaseNameMap[marketName]
 
-	// 	// val := entity.QuoteTick{baseSymbol, currencySymbol, "gdax-" + currencySymbol + "-" + baseSymbol, open, high, low, last, volume, time.Now().In(loc), change, changePercent}
-	// 	// entity.QuoteUpdates <- val
-	// 	fmt.Println("THIS IS IN THE LOOP FOR SOCKET INFO --------->>>>> ")
+	// val := entity.QuoteTick{baseSymbol, currencySymbol, "gdax-" + currencySymbol + "-" + baseSymbol, open, high, low, last, volume, time.Now().In(loc), change, changePercent}
+	// entity.QuoteUpdates <- val
+	// fmt.Println("THIS IS IN THE LOOP FOR SOCKET INFO --------->>>>> ")
 	// }
 }
