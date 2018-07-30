@@ -1,6 +1,8 @@
 package currencyfetch
 
 // List of rest api's to fetch currency pairs list
+// UPDATE:  this will move to each exchange package accordingly.
+// instead here will be a list of functions for each exchange
 func exchangeList() map[string]string {
 	urls := map[string]string{
 		// "hitbtc": "https://api.hitbtc.com/api/2/public/symbol", // response -> id -> "ETHUSD" **

@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 
+	// "github.com/codercodingthecode/goquote/currencyfetch"
+	// "github.com/codercodingthecode/goquote/currencyfetch"
 	ws "github.com/gorilla/websocket"
 	// "github.com/codercodingthecode/daix/currencyFetch/exchanges"
 )
 
 // SocketStream common function for all exchange, returns raw data
 // func SocketStream(cL map[string][]string, ch chan interface{}) {
-func SocketStream(exchange string, pairs []string, ch chan interface{}) {
+func SocketStream(exchange string, pairs []string, ch chan interface{}, stringBuilder func(string, []string) string) {
 	var writeData interface{}
 	var tickRawData interface{}
 	var websocket ws.Dialer
@@ -26,6 +28,12 @@ func SocketStream(exchange string, pairs []string, ch chan interface{}) {
 
 	// move this to struct
 	bigString := fmt.Sprintf(`{"type":"subscribe","channels": [{"name": "ticker", "product_ids": %s}]}`, b)
+
+	fmt.Println("FROM SOCKECT STRING BUILD -> ", bigString)
+
+	// testingString := currencyfetch.ExchangeString("string", pairs)
+	testingString := stringBuilder("string", pairs)
+	fmt.Println("From exchangeString -> ", testingString)
 
 	writeDataError := json.Unmarshal([]byte(bigString), &writeData)
 	if writeDataError != nil {

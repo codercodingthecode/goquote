@@ -3,28 +3,31 @@ package main
 import (
 	"fmt"
 
-	"github.com/codercodingthecode/goquote/currencyfetch"
-	"github.com/codercodingthecode/goquote/socketsclient"
-	// "github.com/codercodingthecode/goquote/currencyfetch/socketsclient"
-	// "github.com/codercodingthecode/goquote/currencyfetch/socketsclient"
-	// "currencyFetch/socketsclient"
-	// "github.com/codercodingthecode/goquote/currencyfetch/currencyfetch"
-	// "currencyFetch/currencyfetch"
+	"github.com/codercodingthecode/goquote/exchanges"
 )
 
 func main() {
-	ch := make(chan interface{})
+
+	chStatus := make(chan string)
+
+	go exchanges.SubscribeToGDAX(chStatus)
+
+	fmt.Println("THERE WAS AN ERROR ---> ", <-chStatus)
+
+	// ch := make(chan interface{})
 	// chOut := make(chan interface{})
-	cL := currencyfetch.FetchCurrencies()
+	// cL := currencyfetch.FetchCurrencies()
 
-	for k, v := range cL {
-		fmt.Println("RUNNING ON MAIN")
-		go socketsclient.SocketStream(k, v, ch)
-	}
+	// fmt.Println(cL, ch)
+	// for exchange, pairs := range cL {
+	// 	fmt.Println("RUNNING ON MAIN")
+	// 	// dispatch a go routine per exchange on the list
+	// 	go socketsclient.SocketStream(exchange, pairs, ch, currencyfetch.ExchangeString)
+	// }
 
-	for {
-		fmt.Println(<-ch)
-	}
+	// for {
+	// 	// fmt.Println(<-ch)
+	// }
 	// exchanges.Gdax(ch)
 
 }
