@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	// _ "github.com/go-sql-driver/mysql"
 	ws "github.com/gorilla/websocket"
@@ -13,6 +15,21 @@ import (
 
 // CoinRest interface holder for rest api incoming data
 type CoinRest interface{}
+
+// Data structure for quotes tick
+type quoteTick struct {
+	BaseName       string
+	CurrencySymbol string
+	MarketName     string
+	Open           float64
+	High           float64
+	Low            float64
+	Last           float64
+	Volume         float64
+	TimeStamp      time.Time
+	Change         float64
+	ChangePercent  float64
+}
 
 // GDAXI implements funcs
 type GDAXI interface {
@@ -30,6 +47,7 @@ var gdaxRestURL = "https://api.gdax.com/products" // response -> id -> "eth" **
 // it call "restAPICaller" function passing the rest url and a coin interface pointer
 // to retrieve the data
 func fetchGdax(url string) []string {
+
 	cList := make([]string, 0)
 	var coins CoinRest
 
@@ -61,7 +79,7 @@ func restAPICaller(url string, coins *CoinRest) {
 }
 
 func SubscribeToGDAX(chStatus <-chan string) {
-
+	loc, _ := time.LoadLocation("UTC")
 	var writeData interface{}
 	var tickRawData interface{}
 	var websocket ws.Dialer
@@ -91,21 +109,15 @@ func SubscribeToGDAX(chStatus <-chan string) {
 
 		tick := tickRawData.(map[string]interface{})
 
-		// fmt.Println("This is the feed -> ", tickData)
-		// ch <- tickRawData
-		// cb(<-ch)
-		// exchanges.Gdax(tickRawData)
-
 		//--------------------------------------------------------------------------//
 		// shappring data below to send it to redis
 		//--------------------------------------------------------------------------//
-		// tick := message.(map[string]interface{})
 
 		if tick["high_24h"] == nil {
 			continue
 		}
 		last, _ := strconv.ParseFloat(tick["price"].(string), 64)
-		// marketName, _ := tick["product_id"].(string)
+		marketName, _ := tick["product_id"].(string)
 
 		// prevLast, ok := marketCurrencyLastPrice[marketName]
 		// if ok {
@@ -122,13 +134,16 @@ func SubscribeToGDAX(chStatus <-chan string) {
 		change := last - open
 		changePercent := change / open
 
-		// currencySymbol := entity.MarketNameToCurrencySymbolMap[marketName]
+		symbols := strings.Split(marketName, "-")
+		currencySymbol := symbols[0]
+		baseSymbol := symbols[1]
 		// baseSymbol := entity.MarketNameToBaseNameMap[marketName]
+		// val := quoteTick{baseSymbol, currencySymbol, "gdax-" + currencySymbol + "-" + baseSymbol, open, high, low, last, volume, time.Now().In(loc), change, changePercent}
 
-		// val := entity.QuoteTick{baseSymbol, currencySymbol, "gdax-" + currencySymbol + "-" + baseSymbol, open, high, low, last, volume, time.Now().In(loc), change, changePercent}
+		val := quoteTick{baseSymbol, currencySymbol, "gdax-" + currencySymbol + "-" + baseSymbol, open, high, low, last, volume, time.Now().In(loc), change, changePercent}
 		// entity.QuoteUpdates <- val
 
-		fmt.Println("DATA FROM WEBSOCKET --> ", high, low, open, volume, change, changePercent)
+		fmt.Println("DATA FROM WEBSOCKET --> ", val)
 	}
 
 	// var wsDialer ws.Dialer
