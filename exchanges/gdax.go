@@ -22,7 +22,8 @@ func RedisURL() string {
 	// return "quotetick.njaryy.ng.0001.use2.cache.amazonaws.com:6379"
 	// return "quotetick.fcryea.ng.0001.use1.cache.amazonaws.com:6379"
 	// return "uptick-stream-redis.njaryy.0001.use2.cache.amazonaws.com:6379"
-	return "uptick-stream-redis.njaryy.0001.use2.cache.amazonaws.com:6379"
+	//	return "uptick-stream-redis.njaryy.0001.use2.cache.amazonaws.com:6379"
+	return "quotetick.njaryy.ng.0001.use2.cache.amazonaws.com:6379"
 }
 
 // Data structure for quotes tick
@@ -198,13 +199,13 @@ func SubscribeToGDAX(chStatus <-chan string) {
 		if e != nil {
 			fmt.Println("THERE WAS AN ERROR MARSHING STRUCT", content)
 		}
-		// _, err := client.Publish("QuoteTicks", content).Result()
-		// if err != nil {
-		// 	fmt.Println("THERE WAS AN ERROR PUSHING TO REDIS")
-		// 	panic(err)
-		// }
-		// client.Publish("QuoteTicks-"+val.CurrencySymbol, content).Result()
-		// client.Set("QuoteTicks-"+val.CurrencySymbol, content, 0).Result()
+		 _, err := client.Publish("QuoteTicks", content).Result()
+		 if err != nil {
+		 	fmt.Println("THERE WAS AN ERROR PUSHING TO REDIS")
+		 	panic(err)
+		 }
+		 client.Publish("QuoteTicks-"+val.MarketName, content).Result()
+		 client.Set("QuoteTicks-"+val.MarketName, content, 0).Result()
 
 	}
 }
