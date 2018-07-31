@@ -10,7 +10,7 @@ func main() {
 
 	chStatus := make(chan string)
 
-	exchanges.SubscribeToGDAX(chStatus)
+	go exchanges.SubscribeToGDAX(chStatus)
 
 	fmt.Println("THERE WAS AN ERROR ---> ", <-chStatus)
 
