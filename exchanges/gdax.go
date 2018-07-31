@@ -186,7 +186,7 @@ func SubscribeToGDAX(chStatus <-chan string) {
 		change := last - open
 		changePercent := change / open
 
-		symbols := strings.Split(marketName, "-")
+		symbols := strings.Split(marketName, "-") // BTC-USD
 		currencySymbol := symbols[0]
 		baseSymbol := symbols[1]
 
@@ -198,13 +198,35 @@ func SubscribeToGDAX(chStatus <-chan string) {
 		if e != nil {
 			fmt.Println("THERE WAS AN ERROR MARSHING STRUCT", content)
 		}
-		// _, err := client.Publish("QuoteTicks", content).Result()
-		// if err != nil {
-		// 	fmt.Println("THERE WAS AN ERROR PUSHING TO REDIS")
-		// 	panic(err)
-		// }
-		// client.Publish("QuoteTicks-"+val.CurrencySymbol, content).Result()
-		// client.Set("QuoteTicks-"+val.CurrencySymbol, content, 0).Result()
+		_, err := client.Publish("QuoteTicks", content).Result()
+		if err != nil {
+			fmt.Println("THERE WAS AN ERROR PUSHING TO REDIS")
+			panic(err)
+		}
+		client.Publish("QuoteTicks-"+val.CurrencySymbol, content).Result()
+		client.Set("QuoteTicks-"+val.CurrencySymbol, content, 0).Result()
 
 	}
 }
+
+// QuoteTicks-bittrex-SPR-BTC,
+// QuoteTicks-bittrex-XMR-BTC,
+// QuoteTicks-uptick-EXCL-BTC,
+// QuoteTicks-uptick-DASH-ETH,
+// QuoteTicks-uptick-DNT-ETH,
+// QuoteTicks-bittrex-CVC-BTC,
+// QuoteTicks-uptick-SC-USDT,
+// QuoteTicks-bittrex-GRC-BTC,
+// QuoteTicks-bittrex-XMR-ETH,
+// QuoteTicks-uptick-ADA-ETH,
+// QuoteTicks-bittrex-DOPE-BTC,
+// QuoteTicks-bittrex-DASH-BTC,
+// QuoteTicks-bittrex-ANT-ETH,
+// QuoteTicks-bittrex-GAME-BTC,
+// QuoteTicks-gdax-ETH-USD,
+// QuoteTicks-uptick-LUN-BTC,
+// QuoteTicks-bittrex-WINGS-BTC,
+// QuoteTicks-hitbtc-DICE-ETH,
+// QuoteTicks-bittrex-ZEC-USDT,
+// QuoteTicks-uptick-BAT-BTC,
+// QuoteTicks-uptick-SC-BTC,
