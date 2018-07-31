@@ -18,11 +18,6 @@ import (
 type CoinRest interface{}
 
 func RedisURL() string {
-	// return "quotetick-001.njaryy.0001.use2.cache.amazonaws.com:6379"
-	// return "quotetick.njaryy.ng.0001.use2.cache.amazonaws.com:6379"
-	// return "quotetick.fcryea.ng.0001.use1.cache.amazonaws.com:6379"
-	// return "uptick-stream-redis.njaryy.0001.use2.cache.amazonaws.com:6379"
-	//	return "uptick-stream-redis.njaryy.0001.use2.cache.amazonaws.com:6379"
 	return "quotetick.njaryy.ng.0001.use2.cache.amazonaws.com:6379"
 }
 
