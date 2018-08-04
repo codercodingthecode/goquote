@@ -37,22 +37,22 @@ func main() {
 	pong, err := client.Ping().Result()
 	fmt.Println("from redis --------------------->>>>   ", pong, err)
 
-	// pubsub := client.Subscribe("QuoteTicks")
-	// defer pubsub.Close()
+	 pubsub := client.Subscribe("QuoteTicks")
+	 defer pubsub.Close()
 
-	// for {
-	// 	msg, err := pubsub.ReceiveMessage()
-	// 	if err != nil {
-	// 		fmt.Println("Erros ->>  ", err)
-	// 		break
-	// 	}
-	// 	// var quoteTick quoteTicks
-	// 	fmt.Println(msg)
-	// 	// err1 := quoteTick.UnmarshalBinary([]byte(msg.Payload))
-	// 	// if err1 == nil {
-	// 	// 	marketsForCandle <- quoteTick
-	// 	// } else {
-	// 	// 	fmt.Println(err1)
-	// 	// }
-	// }
+	 for {
+	 	msg, err := pubsub.ReceiveMessage()
+	 	if err != nil {
+	 		fmt.Println("Erros ->>  ", err)
+	 		break
+	 	}
+	 	 //var quoteTick quoteTicks
+	 	fmt.Println(msg)
+	 	 //err1 := quoteTick.UnmarshalBinary([]byte(msg.Payload))
+	 	 //if err1 == nil {
+	 	// 	marketsForCandle <- quoteTick
+	 	 //} else {
+	 	// 	fmt.Println(err1)
+	 	 //}
+	 }
 }
